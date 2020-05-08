@@ -1,25 +1,21 @@
-
 import matplotlib.pyplot as plt
 import matplotlib.dates as dts
 import datetime
 
 
 def place_file_list(name):
-    # Opens a file and puts it in tree list
+    # Opens a file and puts it in two list and output a list
     with open(name, "r") as f:
         f.readline()
         date_list = []
         value_list = []
-        time_list = []
         for line in f:
             date = line[:10]
-            time = line[12:20]
-            value = line[20:-4]
-            value = int(value)
+            value = line[11:14]
+            value = float(value)
             date_list.append(date)
-            time_list.append(time)
             value_list.append(value)
-    return date_list, value_list, time_list
+    return date_list, value_list
 
 
 def instanser_dateime(date_list):
@@ -40,7 +36,7 @@ def options():
 
 def file_option():
     # Converts str date to flyttalsformat date
-    (date_list, time_list, value_list) = place_file_list(
+    (date_list, value_list) = place_file_list(
         input("Skriv in namnet på filen: "))
     datetime_x = instanser_dateime(date_list)
     dates_x = [dts.date2num(item) for item in datetime_x]
@@ -85,8 +81,8 @@ def creating_graf(dates_x, value_list):
     stop_date = dts.num2date(stop_date)
     stop_date = stop_date[0]
     fig, ax = plt.subplots()
-    ax.set_title("Stock Value")
-    ax.set_ylabel("Price, SEK")
+    ax.set_title("Temperatur i Karlskrona")
+    ax.set_ylabel("Temperatur,celcius")
     if float(stop_date.strftime("%Y") +
              stop_date.strftime("%m")+stop_date.strftime("%d"))-float(start_date.strftime("%Y") +
                                                                       start_date.strftime("%m") +
@@ -165,3 +161,4 @@ def run():
 
 
 run()
+
