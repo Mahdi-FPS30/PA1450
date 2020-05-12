@@ -12,7 +12,7 @@ def place_file_list(name):
         for line in f:
             date = line[:10]
             value = line[11:14]
-            value = float(int(value))
+            value = float(value)
             date_list.append(date)
             value_list.append(value)
     return date_list, value_list
@@ -130,8 +130,9 @@ def run():
                 x_valu, y_valu_s, date_str = file_option()
             except FileNotFoundError as error:
                 print("\nError message: ", error)
-            except:
-                print("Försök igen")
+                print(1)
+            # except:
+            #     print("Försök igen")
             try:
                 y_valu = y_valu_s
             except UnboundLocalError as Uerror:
