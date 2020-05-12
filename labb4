@@ -1,0 +1,112 @@
+#Mahdi Yaqubi
+import matplotlib.pyplot as plt
+import matplotlib.dates as dts
+import datetime
+
+def read_file(filename):
+    d = {}
+    with open(filename) as f:
+        f.readline()
+        for line in f:
+            (key, val) = line.split()
+            d[(key)] = val
+            val = float(val)
+
+    value_1 = list(d.values()) #Gör keys och values till listor
+    for element in range(len(value_1)):
+        value_1[element] = float(value_1[element])
+
+    key_1 = list(d.keys())
+    key_1 = [x[:-1] for x in key_1]
+    return [value_1, key_1], key_1[0], key_1[-1]
+
+def time_interval(filename,list_1, start_date, stop_date):
+    if start_date and stop_date in list_1[1]:
+        if list_1[1].index(start_date) < list_1[1].index(stop_date):
+            new_list_x = list_1[1][list_1[1].index(start_date):list_1[1].index(stop_date)+1]
+            new_list_y = list_1[0][list_1[1].index(start_date):list_1[1].index(stop_date)+1]
+        else:
+            print("\nfel intervall, startdatum före slutdatum.")
+    else:
+        print("\nDatumen finns inte i filen! Försök igen:")
+    return [new_list_x, new_list_y]
+
+def graph(filename, list_1, start_date, stop_date, new_list = None):
+    new_list = time_interval(filename, list_1, start_date, stop_date)
+    
+    fig, ax = plt.subplots()
+    ax.set_title("börskurs")
+    ax.set_xlabel("Datum")
+    ax.set_ylabel("Dagnotering (SEK)")
+    x = new_list[0]
+
+    datetime_x = [datetime.datetime.strptime(item, '%Y-%m-%d') for item in x] 
+    dates_x = [dts.date2num(item) for item in datetime_x] 
+
+    y = new_list[1]
+
+    months = dts.MonthLocator()
+    years = dts.YearLocator()
+    ax.xaxis.set_major_locator(years)
+    years_format = dts.DateFormatter('%Y')
+    ax.xaxis.set_major_formatter(years_format)
+    ax.xaxis.set_minor_locator(months)
+    ax.plot(dates_x,y)
+    fig.autofmt_xdate()
+
+    if datetime_x[-1] - datetime_x[0] < datetime.timedelta(days=13):
+        ax.xaxis.set_major_locator(dts.DayLocator())
+        ax.xaxis.set_major_formatter(dts.DateFormatter("%a\n%Y-%m-%d "))
+
+    elif datetime_x[-1] - datetime_x[0] < datetime.timedelta(days=731):
+        ax.xaxis.set_major_locator(dts.MonthLocator())
+        ax.xaxis.set_major_formatter(dts.DateFormatter("%B\n%Y"))
+    else:
+        ax.xaxis.set_major_locator(dts.YearLocator())
+        ax.xaxis.set_major_formatter(dts.DateFormatter("%Y"))
+    plt.show()
+
+def choice():
+    filename = None
+    choice = 0
+    while choice != 4:
+        try:
+            choice = int(input("\nvälj en operation\
+                \n(1) Läs in en fil\
+                \n(2) Välja tidsintervall att visa i grafen\
+                \n(3) Visa grafen\
+                \n(4) avsluta programmet\n"))
+        except ValueError:
+            print("")
+        if choice == 1:
+            check_file_exist = False
+            while not check_file_exist:
+                try:
+                    filename = input("\nSkriv in namnet på filen: ")
+                    list_1, start_date, stop_date = read_file(filename)
+                except Exception as error:
+                    print(error)
+                else:
+                    check_file_exist = True
+        elif choice == 2:
+            check = False
+            while not check:
+                start_date = input("\nSkriv intervallets startdatum (YYYY-MM-DD): ")
+                stop_date = input("\nSkriv intervallets stopdatum (YYYY-MM-DD): ")
+                try:
+                    new_list = time_interval(filename,list_1, start_date, stop_date)
+                except Exception:
+                    print("") 
+                else:
+                    check = True
+        elif choice == 3:
+            if filename != None:
+                if "new_list" not in globals(): # om variabeln new_list inte existerar globalt
+                    graph(filename, list_1, start_date, stop_date)
+                else:
+                    graph(filename, list_1, start_date, stop_date, new_list)
+        elif choice == 4:
+            print("hejdå")
+        else:
+            print("fel val, välj igen.")
+choice()
