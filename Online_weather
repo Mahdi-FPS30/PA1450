@@ -34,7 +34,7 @@ def options():
                 \n(3) Visa graf" + "\n(4) Avsluta programmet" + "\nDitt val: ")
     return val
 
-def choosen_fil():
+def choosen_file():
 
     num = int(input("\nVilken fil vill du läsa in?\n1. Temperatur per dag.txt\n2. Soltimmar.txt\n3. Nederbörd.txt\n4. Vind.txt\nVal: "))
     while 0<num <=4:
@@ -141,7 +141,7 @@ def run():
         if val == "1":
             try:
                 # x_valu, y_valu_s, date_str = file_option()
-                x_valu, y_valu_s, date_str = choosen_fil()
+                x_valu, y_valu_s, date_str = choosen_file()
             except FileNotFoundError as error:
                 print("\nError message: ", error)                
             except:
