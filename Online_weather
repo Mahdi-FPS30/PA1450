@@ -5,6 +5,7 @@ import datetime
 
 def place_file_list(name):
     # Opens a file and puts it in two list and output a list
+    # name = choosen_fil()
     with open(name, "r") as f:
         f.readline()
         date_list = []
@@ -28,19 +29,31 @@ def instanser_dateime(date_list):
 
 def options():
     # Lets the user input a choice
-    val = input("\nVad vill du göra?\n(1) Läsa in en ny fil" + "\n(2) läsa in fler filer \
-                \n(3)Välja tidsintervall att visa i grafen \
-                \n(4) Visa graf" + "\n(5) Avsluta programmet" + "\nDitt val: ")
+    val = input("\nVad vill du göra?\n(1) Läsa in en ny fil \
+                \n(2)Välja tidsintervall att visa i grafen \
+                \n(3) Visa graf" + "\n(4) Avsluta programmet" + "\nDitt val: ")
     return val
 
+def choosen_fil():
 
-def file_option():
-    # Converts str date to flyttalsformat date
-    (date_list, value_list) = place_file_list(
-        input("\nSkriv in namnet på filen: "))
-    datetime_x = instanser_dateime(date_list)
-    dates_x = [dts.date2num(item) for item in datetime_x]
-    return dates_x, value_list, date_list
+    num = int(input("\nVilken fil vill du läsa in?\n1. Temperatur per dag.txt\n2. Soltimmar.txt\n3. Nederbörd.txt\n4. Vind.txt\nVal: "))
+    while 0<num <=4:
+        if num == 1:
+            infile = "Temperatur per dag.txt"
+        elif num == 2:
+            infile = "Soltimmar.txt"
+    
+        elif num == 3:
+            infile = "Nederbörd.txt"
+        
+        elif num == 4:
+            infile = "vind.txt"
+            
+        (date_list, value_list) = place_file_list(infile)
+        datetime_x = instanser_dateime(date_list)
+        dates_x = [dts.date2num(item) for item in datetime_x]
+
+        return dates_x, value_list, date_list
 
 
 def timespand_option(x_valu, y_valu):
@@ -127,22 +140,18 @@ def run():
         val = options()
         if val == "1":
             try:
-                x_valu, y_valu_s, date_str = file_option()
+                # x_valu, y_valu_s, date_str = file_option()
+                x_valu, y_valu_s, date_str = choosen_fil()
             except FileNotFoundError as error:
-                print("\nError message: ", error)
-                print(1)
-            # except:
-            #     print("Försök igen")
+                print("\nError message: ", error)                
+            except:
+                print("Försök igen")
             try:
                 y_valu = y_valu_s
             except UnboundLocalError as Uerror:
                 print("Du måste skriva in en txt fil", Uerror)
-        
+                
         elif val == "2":
-            return None
-
-        
-        elif val == "3":
             try:
                 x_valu, y_valu = timespand_option(date_str, y_valu_s)
             except ValueError as error:
@@ -152,7 +161,7 @@ def run():
                 print(
                     "En fil måste först läsas in innan du kan bestämma tidsram", Un_error)
         
-        elif val == "4":
+        elif val == "3":
             try:
                 if y_valu == y_valu_s:
                     y_valu = y_valu_s
@@ -162,7 +171,7 @@ def run():
             except IndexError as in_error:
                 print(f"tidsramen som val är inte acepterar: {in_error}")
         
-        elif val == "5":
+        elif val == "4":
             stop = "Ja"
         
         else:
