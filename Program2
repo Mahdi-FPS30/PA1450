@@ -1,0 +1,126 @@
+import numpy as np
+import matplotlib
+import matplotlib.pyplot as plt
+import matplotlib.dates as dts
+import datetime
+from matplotlib.ticker import MaxNLocator
+
+start_date = datetime.datetime.now() #default för start och slut datum
+end_date = datetime.datetime.now()
+days = 0
+
+def print_meny():
+    print("\nRapport - börskurser\n------------------------------\n")
+    print("1. Läs in en ny fil\n2. Välj tidsintervall för graf\n3. Visa graf\n4. Avsluta programmet")
+    choice = str(input("Val: "))
+    while (choice != '1') and (choice != '2') and (choice != '3') and (choice != '4'):
+        print("Fel inmatning, testa igen. . .")
+        choice = str(input())
+    return choice
+
+def choosen_fil():
+    num = str(input("\nVilken fil vill du läsa in?\n1. apple_USD.txt\n2. telia_SEK.txt\n3. tesla_USD.txt\n4. volvoB_SEK.txt\nVal: "))
+    while (num != '1') and (num != '2') and (num != '3') and (num != '4'):
+        print("Fel inmatning, testa igen. . .")
+        num = str(input())
+    if num == '1':
+        infile = 'apple_USD.txt'
+    elif num == '2':
+        infile = 'telia_SEK.txt'
+    elif num == '3':
+        infile = 'tesla_USD.txt'
+    elif num == '4':
+        infile = 'volvoB_SEK.txt'
+    return infile
+    
+def fil_to_dict(infile):
+    dictionary = {}
+    with open(infile, 'r') as fil:
+        firstline = fil.readline() #hoppar över första raden i filen
+        for line in fil:
+            date = line.rstrip('\n').split(', ')
+            value_of_share = float(date[1])
+            dictionary[date[0]] = value_of_share 
+    return dictionary
+
+def switch_file():
+    global start_date   #vill få tillgång till den globala variabeln för att kunna ändrar på värdet för variabeln --> så att värdet även ändras utanför funktionen
+    global end_date
+    global days
+    infile = choosen_fil()
+    dictionary = fil_to_dict(infile)
+    date_list = list(dictionary.keys())
+    start_date = date_list[0]   #skulle inget datum vara inmatat från (2) så sätts första datumet i listan (index 0)
+    end_date = date_list[-1]    #samma för sista datumet har index -1
+    days = 0
+    return dictionary
+
+def start_and_end_dates(): #sätter intervallet
+    global start_date   #globala för att de ska kunna nås i hela mainen, även om man inte matat in något intervall
+    global end_date
+    global days
+    print("Mata in på följande form: YYYY-MM-DD")
+    correct = False
+    while not correct:
+        try:
+            startI = input("Mata in start datum: ")
+            endI = input("Mata in slut datum: ")
+            start_date = datetime.datetime.strptime(startI, "%Y-%m-%d") #om det inte är inmatat på fomern eller om fel datum (ex 28 feb)
+            end_date = datetime.datetime.strptime(endI, "%Y-%m-%d")
+            correct = True
+        except:
+            print("Fel inmatning!")
+    diff = end_date - start_date                                #räknar ut skillnaden mellan datumen
+    days = diff.total_seconds()/86400 # (3600*24)               gör om dessa till dagar s
+
+def print_graf(dictionary):
+    value_of_share = [float(i) for i in dictionary.values()]    #gör om values från dict till float tal i en lista
+    date = list(dictionary.keys())                              #keys (datum) till en lista
+
+    if days != 0: # om man matat in ett specifikt intervall, då ändras listan days så att denna stämmer överens med, filtrerar bort det andra 
+        date = list(filter(lambda x : datetime.datetime.strptime(x, '%Y-%m-%d') <= end_date and datetime.datetime.strptime(x, '%Y-%m-%d') >= start_date, date))
+        value_of_share = [float(dictionary[i]) for i in date]
+
+    fig, ax = plt.subplots()
+    ax.set_title("Aktiekurs")
+    ax.set_ylabel("Pris, SEK")
+    ax.set_xlabel("Datum")
+    datetime_x = [datetime.datetime.strptime(item, '%Y-%m-%d') for item in date] #representera en instans av typen datetime som en sträng med valt format
+    dates_x = [dts.date2num(item) for item in datetime_x]
+    months = dts.MonthLocator()     #märker ut månader
+    years = dts.YearLocator()       #märker ut år
+    dayss = dts.DayLocator()        #märker ut dagar
+    ax.plot(dates_x, value_of_share)
+
+    if days > 365*2 or days == 0:                #om dagar som räkats ut är mer än 2 år eller 0, alltså att inget intevall matats in
+        ax.xaxis.set_major_locator(years)        #högsta nivån av markör
+        years_format = dts.DateFormatter('%Y')   #formatsträngen följer samma formatkod som valts
+        ax.xaxis.set_major_formatter(years_format)
+        ax.xaxis.set_minor_locator(months)      #lägsta nivån av markör
+    elif days < 14:                             #mindre än två veckor, kollar först om det är mindre än två veckor
+        ax.xaxis.set_major_locator(dayss)
+        days_format = dts.DateFormatter('%a')
+        ax.xaxis.set_major_formatter(days_format)
+    elif days < 365*2:                           #om dagar är mindre än två år men mer än två vekcor          
+        ax.xaxis.set_major_locator(months)
+        month_format = dts.DateFormatter('%b')
+        ax.xaxis.set_major_formatter(month_format)
+    
+    ax.grid(True)                               #rutnät
+    fig.autofmt_xdate(rotation=90)              #roterar text med 90° så den är vertikal
+    plt.show()                                  #skriver ut grafen
+
+if __name__ == "__main__": 
+    choice = ''
+    while choice != '4':
+        choice = str(print_meny())
+        if choice == '1':
+            dictionary = switch_file()
+        elif choice == '2':
+            start_and_end_dates()
+        elif choice == '3':
+            print_graf(dictionary)
+        elif choice == '4':
+            print("Programmet avslutas. . .")
+
+   
