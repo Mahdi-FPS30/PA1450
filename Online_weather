@@ -29,9 +29,12 @@ def instanser_dateime(date_list):
 
 def options():
     # Lets the user input a choice
-    val = input("Vad vill du göra?\n(1) Läsa in en ny fil" + "\n(2) Välja tidsintervall att visa i grafen" +
-                "\n(3) Visa graf" + "\n(4) Avsluta programmet" + "\nDitt val: ")
+    val = input("\nVad vill du göra?\n(1) Läsa in en ny fil" + "\n(2) läsa in fler filer \
+                \n(3)Välja tidsintervall att visa i grafen +\
+                \n(4) Visa graf" + "\n(5) Avsluta programmet" + "\nDitt val: ")
+    val = input("\n ")
     return val
+
 
 
 def file_option():
