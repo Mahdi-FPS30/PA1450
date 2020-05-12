@@ -1,0 +1,163 @@
+import matplotlib.pyplot as plt
+import matplotlib.dates as dts
+import datetime
+
+
+def place_file_list(name):
+    # Opens a file and puts it in two list and output a list
+    with open(name, "r") as f:
+        f.readline()
+        date_list = []
+        value_list = []
+        for line in f:
+            date = line[:10]
+            value = line[11:14]
+            value = float(int(value))
+            date_list.append(date)
+            value_list.append(value)
+    return date_list, value_list
+
+
+def instanser_dateime(date_list):
+    # converts str date to instanser date
+    date_instanser_list = []
+    for date in date_list:
+        instanser_date = [datetime.datetime.strptime(date, '%Y-%m-%d')]
+        date_instanser_list.append(instanser_date)
+    return date_instanser_list
+
+
+def options():
+    # Lets the user input a choice
+    val = input("\nVad vill du göra?\n(1) Läsa in en ny fil" + "\n(2) Välja tidsintervall att visa i grafen" +
+                "\n(3) Visa graf" + "\n(4) Avsluta programmet" + "\nDitt val: ")
+    return val
+
+
+def file_option():
+    # Converts str date to flyttalsformat date
+    (date_list, value_list) = place_file_list(
+        input("\nSkriv in namnet på filen: "))
+    datetime_x = instanser_dateime(date_list)
+    dates_x = [dts.date2num(item) for item in datetime_x]
+    return dates_x, value_list, date_list
+
+
+def timespand_option(x_valu, y_valu):
+    # Lets the user input a timespand
+    timespand = "NOT"
+    zip_objekt = zip(x_valu, y_valu)
+    dictionary = dict(zip_objekt)
+    while timespand == "NOT":
+        timespand_start = input(
+            "\nSkriv in datumet du vill att grafen ska starta på YYYY-MM-DD: ")
+        timespand_stop = input(
+            "\nSkriv in datumet du vill att grafen sluta på YYYY-MM-DD: ")
+        tst = timespand_start
+        tsp = timespand_stop
+        if float(tst[:4]+tst[5:7]+tst[8:10]) > float(tsp[:4]+tsp[5:7]+tsp[8:10]):
+            print(
+                f"\nDitt startdatum: {tst} måste vara tidnigare än ditt stopp datum: {tsp}")
+        else:
+            timespand = "OK"
+    x_valu_r = []
+    y_valu_r = []
+    for date in dictionary:
+        if date > timespand_start and date < timespand_stop:
+            x_valu_r.append(date)
+            y_valu_r.append(dictionary[date])
+    datetime_x = instanser_dateime(x_valu_r)
+    dates_x = [dts.date2num(item) for item in datetime_x]
+    return dates_x, y_valu_r
+
+
+def creating_graf(dates_x, value_list):
+    # Creats a graf
+    start_date = dates_x[0]
+    dates_x_list = dates_x[:]
+    stop_date = dates_x_list.pop()
+    start_date = dts.num2date(start_date)
+    start_date = start_date[0]
+    stop_date = dts.num2date(stop_date)
+    stop_date = stop_date[0]
+    fig, ax = plt.subplots()
+    ax.set_title("Temperatur i Karlskrona")
+    ax.set_ylabel("Temperatur,celcius")
+    if float(stop_date.strftime("%Y") +
+             stop_date.strftime("%m")+stop_date.strftime("%d"))-float(start_date.strftime("%Y") +
+                                                                      start_date.strftime("%m") +
+                                                                      start_date.strftime("%d")) > 20000:
+        ax.set_xlabel("Year")
+        months = dts.MonthLocator()
+        years_markers = dts.YearLocator()
+        ax.xaxis.set_major_locator(years_markers)
+        years_format = dts.DateFormatter('%Y')
+        ax.xaxis.set_major_formatter(years_format)
+        ax.xaxis.set_minor_locator(months)
+        ax.plot(dates_x, value_list, color='g')
+        plt.show()
+
+    elif float(stop_date.strftime("%Y")+stop_date.strftime("%m")
+               + stop_date.strftime("%d"))-float(start_date.strftime("%Y") +
+                                                 start_date.strftime("%m") +
+                                                 start_date.strftime("%d")) and \
+            float(stop_date.strftime("%Y")+stop_date.strftime("%m") +
+                  stop_date.strftime("%d"))-float(start_date.strftime("%Y")+start_date.strftime("%m") +
+                                                  start_date.strftime("%d")) >= 14:
+        ax.set_xlabel("Month")
+        months_markers = dts.MonthLocator()
+        ax.xaxis.set_major_locator(months_markers)
+        months_format = dts.DateFormatter('%m')
+        ax.xaxis.set_major_formatter(months_format)
+
+    elif float(stop_date.strftime("%d"))-float(start_date.strftime("%d")) < 14:
+        ax.set_xlabel("Day")
+        day_marker = dts.DayLocator()
+        ax.xaxis.set_major_locator(day_marker)
+        day_format = dts.DateFormatter('%d')
+        ax.xaxis.set_major_formatter(day_format)
+    ax.plot(dates_x, value_list, color='g')
+    plt.show()
+
+
+def run():
+    # Run the program
+    stop = "Nej"
+    while stop == "Nej":
+        val = options()
+        if val == "1":
+            try:
+                x_valu, y_valu_s, date_str = file_option()
+            except FileNotFoundError as error:
+                print("\nError message: ", error)
+            # except:
+                # print("Försök igen")
+            # try:
+            #     y_valu = y_valu_s
+            # except UnboundLocalError as Uerror:
+            #     print("Du måste skriva in en txt fil", Uerror)
+        elif val == "2":
+            try:
+                x_valu, y_valu = timespand_option(date_str, y_valu_s)
+            except ValueError as error:
+                print(
+                    "Tidspandet måste skrivas med siffror i formatet YYYY-MM-DD", error)
+            except UnboundLocalError as Un_error:
+                print(
+                    "En fil måste först läsas in innan du kan bestämma tidsram", Un_error)
+        elif val == "3":
+            try:
+                if y_valu == y_valu_s:
+                    y_valu = y_valu_s
+                creating_graf(x_valu, y_valu)
+            except UnboundLocalError as Un_error:
+                print("En fil måste först läsas in innan du kan skapa en graf")
+            except IndexError as in_error:
+                print(f"tidsramen som val är inte acepterar: {in_error}")
+        elif val == "4":
+            stop = "Ja"
+        else:
+            print("\nDu har inte skrivit ut ett valbart alternativ försök igen")
+
+
+run()
